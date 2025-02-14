@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/api/notes")
 public class NoteController {
+
     @Autowired
     private NoteService noteService;
 
@@ -19,14 +20,15 @@ public class NoteController {
     public Note createNote(@RequestBody String content,
                            @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        System.out.println("USER DETAILS" + username);
+        System.out.println("USER DETAILS: " + username);
         return noteService.createNoteForUser(username, content);
     }
 
     @GetMapping
-    public List<Note> getUsersNotes(@AuthenticationPrincipal UserDetails userDetails) {
+    public List<Note> getUserNotes(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return noteService.getNoteForUser(username);
+        System.out.println("USER DETAILS: " + username);
+        return noteService.getNotesForUser(username);
     }
 
     @PutMapping("/{noteId}")

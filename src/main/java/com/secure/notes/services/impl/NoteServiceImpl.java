@@ -10,11 +10,12 @@ import java.util.List;
 
 @Service
 public class NoteServiceImpl implements NoteService {
+
     @Autowired
     private NoteRepository noteRepository;
 
     @Override
-    public Note createNoteForUser(String username, String content){
+    public Note createNoteForUser(String username, String content) {
         Note note = new Note();
         note.setContent(content);
         note.setOwnerUsername(username);
@@ -23,22 +24,23 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public Note updateNoteForUser(Long noteId, String content, String username){
-        Note note = noteRepository.findById(noteId).orElseThrow(() ->
-                new RuntimeException("Note not found"));
+    public Note updateNoteForUser(Long noteId, String content, String username) {
+        Note note = noteRepository.findById(noteId).orElseThrow(()
+                -> new RuntimeException("Note not found"));
         note.setContent(content);
-        Note updateNote = noteRepository.save(note);
-        return updateNote;
+        Note updatedNote = noteRepository.save(note);
+        return updatedNote;
     }
 
     @Override
-    public void deleteNoteForUser(Long noteId, String username){
+    public void deleteNoteForUser(Long noteId, String username) {
         noteRepository.deleteById(noteId);
     }
 
     @Override
-    public List<Note> getNoteForUser(String username){
-        List<Note> personalNotes = noteRepository.findByOwnerUsername(username);
+    public List<Note> getNotesForUser(String username) {
+        List<Note> personalNotes = noteRepository
+                .findByOwnerUsername(username);
         return personalNotes;
     }
 }
