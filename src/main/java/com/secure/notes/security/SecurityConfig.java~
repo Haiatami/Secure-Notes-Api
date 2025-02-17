@@ -91,7 +91,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(requests
                         -> requests
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight requests
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/csrf-token").permitAll()

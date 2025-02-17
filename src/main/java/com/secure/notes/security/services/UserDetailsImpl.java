@@ -1,4 +1,4 @@
-package com.secure.notes.services.impl;
+package com.secure.notes.security.services;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 
 @NoArgsConstructor
 @Data
