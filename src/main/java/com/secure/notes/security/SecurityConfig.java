@@ -127,6 +127,7 @@ public class SecurityConfig {
                 admin.setRole(adminRole);
                 userRepository.save(admin);
             }
+        };
     }
 
     @Bean
