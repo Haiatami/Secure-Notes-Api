@@ -133,7 +133,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Allow requests from this origin
+        configuration.setAllowedOrigins(Arrays.asList("https://secure-notes-react.vercel.app")); // Allow requests from this origin
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-XSRF-TOKEN")); // Allowed headers
         configuration.setAllowCredentials(true); // Allow sending credentials like cookies
