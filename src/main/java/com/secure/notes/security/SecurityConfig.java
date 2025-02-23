@@ -13,7 +13,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,8 +23,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -47,90 +51,32 @@ public class SecurityConfig {
         return new AuthTokenFilter();
     }
 
-//    @Bean
-//    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(csrf ->
-//                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//                        .ignoringRequestMatchers("/api/auth/public/**"));
-//        http.authorizeHttpRequests((requests) ->
-//                requests
-//                        .requestMatchers("/contact").permitAll()
-//                        .requestMatchers("/public/**").permitAll()
-//                        .requestMatchers("/admin").denyAll()
-//                        .requestMatchers("/admin/**").denyAll()
-//                        .anyRequest().authenticated());
-//        http.authorizeHttpRequests((requests) ->
-//                requests
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/api/csrf-token").permitAll()
-//                        .requestMatchers("/api/auth/public/**").permitAll()
-//                        .requestMatchers("/public/**").permitAll()
-//                        .anyRequest().authenticated());
-//        http.exceptionHandling(exception
-//                -> exception.authenticationEntryPoint(unauthorizedHandler));
-//        http.addFilterBefore(authenticationJwtTokenFilter(),
-//                UsernamePasswordAuthenticationFilter.class);
-//        http.formLogin(withDefaults());
-//        http.csrf(AbstractHttpConfigurer::disable);
-//        http.addFilterBefore(new CustomLoggingFilter(),
-//                UsernamePasswordAuthenticationFilter.class);
-//        http.addFilterAfter(new RequestValidationFilter(),
-//                CustomLoggingFilter.class);
-//        http.sessionManagement(sessions ->
-//                sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//        http.httpBasic(withDefaults());
-//        return http.build();
-//    }
-
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf ->
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .ignoringRequestMatchers("/api/auth/**")
-            );
-
-        http.authorizeHttpRequests(requests
+                        .ignoringRequestMatchers("/api/auth/public/**")
+        );
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource())); // Enable CORS
+        //http.csrf(AbstractHttpConfigurer::disable);
+        http.authorizeHttpRequests((requests)
                         -> requests
-                        .requestMatchers("/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/csrf-token").permitAll()
+                        .requestMatchers("/api/auth/public/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .anyRequest().authenticated())
-            .oauth2Login(oauth2 -> {
-                oauth2.successHandler(oAuth2LoginSuccessHandler);
-            });
-
+                .oauth2Login(oauth2 -> {
+                    oauth2.successHandler(oAuth2LoginSuccessHandler);
+                });
         http.exceptionHandling(exception
                 -> exception.authenticationEntryPoint(unauthorizedHandler));
         http.addFilterBefore(authenticationJwtTokenFilter(),
                 UsernamePasswordAuthenticationFilter.class);
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
-
         return http.build();
     }
-
-
-//    @Bean
-//    public UserDetailsService userDetailsService(DataSource dataSource) {
-//        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
-//        if(!manager.userExists("user")) {
-//            manager.createUser(
-//                    User.withUsername("user")
-//                            .password("{noop}password")
-//                            .roles("USER")
-//                            .build());
-//        }
-//        if(!manager.userExists("admin")) {
-//            manager.createUser(
-//                    User.withUsername("admin")
-//                            .password("{noop}adminPassword")
-//                            .roles("ADMIN")
-//                            .build());
-//        }
-//        return manager;
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -182,6 +128,18 @@ public class SecurityConfig {
                 admin.setRole(adminRole);
                 userRepository.save(admin);
             }
-        };
+        };   
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow requests from this origin
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-XSRF-TOKEN")); // Allowed headers
+        configuration.setAllowCredentials(true); // Allow sending credentials like cookies
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Apply this configuration to all endpoints
+        return source;
     }
 }

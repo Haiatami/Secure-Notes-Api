@@ -17,4 +17,5 @@ public class LoginResponse {
         this.roles = roles;
         this.jwtToken = jwtToken;
     }
+
 }
